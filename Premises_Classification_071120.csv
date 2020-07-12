@@ -1,0 +1,153 @@
+﻿State,CAT,On_Off,Remarks
+CT,NA,,
+CT,OFF-PREMISE,Off,
+CT,ON-PREMISE,On,
+CT,PACKAGE STORE,Off,
+CT,RESTAURANT PERMIT,On,
+NY,AIRLINE COMPANY,On,
+NY,BALL PARK BEER,On,
+NY,BED AND BREAKFAST - 3 BEDROOMS,On,
+NY,BED AND BREAKFAST - 5 BEDRROMS,On,
+NY,BED AND BREAKFAST - WINE,On,
+NY,BOTTLE CLUB,On,
+NY,BREWER,,Wholesaler
+NY,CABARET LIQUOR,On,
+NY,CATERING ESTABLISHMENT,On,
+NY,CIDER PRODUCER/WHOLESALER,,Manufacturer
+NY,CLUB BEER,On,
+NY,CLUB LIQUOR,On,
+NY,CLUB WINE,On,
+NY,COMBINED CRAFT MANUFACTURER,On,(https://www.nysenate.gov/legislation/laws/ABC/61-A)
+NY,CUSTOM BEERMAKERS CENTER,,Other
+NY,CUSTOM WINEMAKERS CENTER,,Other
+NY,DIRECT WINE SHIPMENT,Off,
+NY,"DISTILLER ""A""",,Wholesaler
+NY,"DISTILLER ""A-1""",,Wholesaler
+NY,"DISTILLER ""B""",,Wholesaler
+NY,"DISTILLER ""B-1""",,Wholesaler
+NY,"DISTILLER ""C""",,Wholesaler
+NY,"DRUG BEER, WINE PROD",Off,
+NY,"DRUG CHAIN, BEER ONLY",Off,
+NY,"DRUG CHAIN, WINE PROD",Off,
+NY,DRUG STORE BEER,Off,
+NY,EATING PLACE BEER,On,
+NY,FARM BREWER,,Wholesaler
+NY,FARM CIDERY,,Wholesaler
+NY,"FARM DISTILLER ""D""",,Wholesaler
+NY,FARM WINERY,,Wholesaler
+NY,GOLF CLUB,On,
+NY,"GROCERY BEER, WINE PROD",Off,
+NY,"GROCERY CHAIN, BEER ONLY",Off,
+NY,"GROCERY CHAIN, WINE PROD",Off,
+NY,GROCERY STORE BEER,Off,
+NY,HOTEL LIQUOR,On,
+NY,HOTEL WINE,On,
+NY,IMPORTER,,Wholesaler
+NY,LIQUOR STORE,Off,
+NY,MASTER FOLDER STATUS RECORD,,Other
+NY,MICRO BREWER,,Wholesaler
+NY,MICRO WINERY,,Wholesaler
+NY,MIXED USE LIQUOR,On,
+NY,NIGHT CLUB / CABARET LIQUOR,On,
+NY,O.P. ENTERTAINMENT,On,
+NY,O.P. FOOD AND BEV,On,
+NY,ON-PREMISES LIQUOR,On,
+NY,RAILROAD CAR,On,
+NY,RESTAURANT BREWER,On,
+NY,RESTAURANT LIQUOR,On,
+NY,RESTAURANT WINE,On,
+NY,ROADSIDE FARM MARKET,Off,
+NY,SUMMER (0. P.) ENTERTAINMENT,,Seasonal
+NY,SUMMER CATERING LIQUOR,,Seasonal
+NY,SUMMER CLUB BEER,,Seasonal
+NY,SUMMER CLUB LIQUOR,,Seasonal
+NY,SUMMER CLUB WINE,,Seasonal
+NY,SUMMER EATING PLACE BEER,,Seasonal
+NY,SUMMER GOLF CLUB,,Seasonal
+NY,SUMMER HOTEL BEER,,Seasonal
+NY,SUMMER HOTEL LIQUOR,,Seasonal
+NY,SUMMER HOTEL WINE,,Seasonal
+NY,SUMMER O.P. FOOD & BEV,,Seasonal
+NY,SUMMER RESTAURANT LIQUOR,,Seasonal
+NY,SUMMER RESTAURANT WINE,,Seasonal
+NY,SUMMER TAVERN WINE,,Seasonal
+NY,SUMMER VESSEL LIQUOR,,Seasonal
+NY,TAVERN WINE,On,
+NY,TEMPORARY WINERY/FARM WINERY,,Manufacturer
+NY,VESSEL LIQUOR,On,
+NY,WHOLESALE BEER(C),,Wholesaler
+NY,WHOLESALE BEER(CO),,Wholesaler
+NY,WHOLESALE CIDER,,Wholesaler
+NY,WHOLESALE LIQUOR,,Wholesaler
+NY,WHOLESALE WINE,,Wholesaler
+NY,WINE CATERING,,Seasonal
+NY,WINE STORE,Off,
+NY,WINERY,,Wholesaler
+NY,WINERY / FARM WINERY RETAIL,Off,
+NY,WINERY RETAIL ON-PREMISES,On,
+PA,Airport Restaurant (Liquor),On,
+PA,Alcohol Beverage,,Wholesaler
+PA,Alcohol Non-Beverage,,Wholesaler
+PA,Alcohol Tax-Exempt,,Wholesaler
+PA,Alternating Brewer,On,
+PA,Amusement Permit (Liquor),,Permit
+PA,Amusement Permit (Malt),,Permit
+PA,Bailee For Hire,,Transporter
+PA,Bonded Warehouse (Liquor),,Wholesaler
+PA,Brandy Permit,,Permit
+PA,Brewery,Both,Mixed
+PA,Brewery Pub,Both,Mixed
+PA,Brewery Storage,Both,Mixed
+PA,Broker Type (Broker Company),,-
+PA,Bulk Purchase,Off,-
+PA,Catering Club (Liquor),On,
+PA,Club (Liquor),On,
+PA,Club (Malt),On,
+PA,Continuing Care Retirement Community (Liquor),Both,Exclude? / Only for residents
+PA,Department of Defense Permit,,Permit
+PA,Direct Beer Shipper,,Transporter
+PA,Direct Wine Shipper,,Transporter
+PA,Distillery,Both,Mixed
+PA,Distillery of Historic Significance,Both,Mixed
+PA,Distributor (Malt),Off,
+PA,Eating Place Retail Dispenser (Malt),Off,
+PA,Economic Development Eating Place (Malt),On,
+PA,Economic Development Restaurant (Liquor),On,
+PA,Extended Hours Food Permit,,Permit
+PA,Farmers Market Permit,,Permit
+PA,Grain Alcohol,,-
+PA,Hospital Permit,,Permit
+PA,Hotel (Liquor),On,
+PA,Hotel (Malt),On,
+PA,Importer,Off,
+PA,Importer's Warehouse,Off,
+PA,Importing Distributor (Malt),Off,
+PA,Limited Distillery,Both,Mixed
+PA,Limited Winery,Both,Mixed
+PA,Manufacturer's Storage Facility,,-
+PA,Municipal Golf Course (Liquor),On,
+PA,Municipal Golf Course (Malt),On,
+PA,Off-Premise Catering Permit,,Permit
+PA,Off-Track Wagering Restaurant (Liquor),Both,Mixed
+PA,Performing Arts Facility,On,
+PA,Privately Owned Private Golf Club,On,
+PA,Privately Owned Private Golf Club Catering Club,On,
+PA,Privately Owned Public Golf Course (Malt),On,
+PA,Privately-Owned Public Golf Course Rest (Liquor),On,
+PA,Public Service (Liquor),On,
+PA,Public Venue Restaurant,On,
+PA,Restaurant (Liquor),On,
+PA,Sacramental Wine,,Religious
+PA,Sales Permit,,Permit
+PA,Special Occasion Permit,,Permit
+PA,Special Occasion Permit (Malt),,Permit
+PA,Sunday Sales Permit,,Permit
+PA,Tavern Gaming,On,
+PA,Transporter for Hire Class A,,Transporter
+PA,Transporter for Hire Class B,,Transporter
+PA,Transporter for Hire Class C,,Transporter
+PA,Vendor Permit,,Permit
+PA,Wholesale Liquor Manufacturer,,Wholesale
+PA,Wine and Spirits Auction Permit,,Permit
+PA,Wine Expanded Permit,,Mixed
+PA,Winery,,Manufacturer
