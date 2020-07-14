@@ -1,6 +1,6 @@
 ## Death count data from CDC WONDER
 library(pacman)
-p_load(tidyverse, dtplyr)
+p_load(tidyverse, dtplyr, sf, tmap)
 pdir <- 'C:/Users/sigma/OneDrive/Data/HIV/Multidisease_data/'
 
 # Data load
@@ -37,3 +37,23 @@ d_combined <- d_hiv0 %>%
 
 # export
 write_csv(d_combined, str_c(pdir, 'HIV_HXV_DRUG_County_Year_2001-2018.csv'))
+
+#
+county <- st_read('C:/Users/sigma/OneDrive/Data/Geo/tl_2018_us_county.shp')
+
+county_s <- county %>% 
+  st_transform(2163) %>% 
+  st_simplify(dTolerance = 500, preserveTopology = TRUE) %>% 
+  st_buffer(0)
+county_s = county_s %>% 
+  filter(!STATEFP %in% c("72", "78", "66", "69", "60", "02", "15", "74"))
+
+d_comb <- d_combined %>% 
+  filter(Year == 2018)
+county_sd <- county_s %>% 
+  left_join(d_comb, by = c('GEOID' = 'FIPS')) %>% 
+  mutate_at(.vars = vars(21, 23:24),
+            .funs = list(~ifelse(.<0, NA, .)))
+
+tm_shape(county_sd) +
+  tm_fill('D_DRUG', style = 'jenks')
