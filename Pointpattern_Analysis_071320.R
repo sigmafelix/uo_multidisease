@@ -2,6 +2,7 @@
 library(pacman)
 p_load(sf, tidyverse, stpp, spatstat)
 
+
 hdir <- '/home/felix/'
 hdir <- 'C:/Users/sigma/'
 
@@ -79,7 +80,7 @@ ddd <- read.table(text = dd, sep = '\t', header = T)
 
 
 ## On- and Off-premise
-alc <- st_read(str_c(hdir, 'OneDrive/Data/HIV/Geocoding/Geocoding_Premise.shp'))
+alc <- st_read(str_c(hdir, 'OneDrive/Data/HIV/Geocoding/Geocoding_Premise_Cleaned_Active.shp'))
 alc <- alc %>% st_transform(2163)
 prep <- prep %>% st_transform(2163)
 state.ct <- state.ct %>% st_transform(2163)
@@ -114,7 +115,7 @@ plot(ctppp.ki)
 
 data_to_ppp <- function(state.name, state.code, state, 
                         premise, prep.c = prep, type1='PrEP', type2='On', levelset = c(type1, type2), 
-                        bound = 'poly', diggle = FALSE){
+                        bound = 'poly', diggle = FALSE, inhom= TRUE, versa = F){
     state.s <- state %>% st_transform(2163)
     stsf <- prep.c %>% 
         filter(grepl(state.name, State)) %>% 
@@ -135,12 +136,11 @@ data_to_ppp <- function(state.name, state.code, state,
     if (bound == 'rect'){
         stppp <- ppp(st_coordinates(stppp)[,1],
                      st_coordinates(stppp)[,2],
-                     c(st_bbox(stppp)[c(1,3)]),
-                     c(st_bbox(stppp)[c(2,4)]),
+                     window = as.owin(poly = state %>% st_transform(2163) %>% st_geometry),
                      marks = factor(stppp$type, levels = levelset))
     } else {
-        owin.poly <- owin(poly = state %>% st_transform(2163) %>% st_coordinates %>% .[nrow(.):1,1:2] %>% 
-                              list(x = .[,1], y = .[,2]))
+        owin.poly <- owin(poly = state %>% st_transform(2163) %>% st_coordinates %>%
+                            .[nrow(.):1, 1:2] %>% list(x = .[,1], y = .[,2]))
         stppp <- ppp(st_coordinates(stppp)[,1],
                      st_coordinates(stppp)[,2],
                      window = owin.poly,
@@ -149,12 +149,44 @@ data_to_ppp <- function(state.name, state.code, state,
     }
     stppp.prep <- split(stppp)[type1][[1]] %>% density.ppp(at = 'points', diggle = diggle)
     stppp.prem <- split(stppp)[type2][[1]] %>% density.ppp(at = 'points', diggle = diggle)
-    stppp.li <- Lcross.inhom(stppp, type1, type2, stppp.prep, stppp.prem)
+    if (inhom){
+        if (versa){
+            stppp.li <- Lcross.inhom(stppp, type2, type1, stppp.prem, stppp.prep)
+            stppp.ji <- Jcross(stppp, type2, type1)
+        } else {
+            stppp.li <- Lcross.inhom(stppp, type1, type2, stppp.prep, stppp.prem)
+            stppp.ji <- Jcross(stppp, type1, type2)
+        }
+        #stppp.env <- envelope(stppp, fun = Lcross.inhom, nsim = 99, funargs = list(i=type1, j=type2, lambdaI=stppp.prep, lambdaJ=stppp.prem,
+        #correction = 'Ripley'))
+    } else {
+        if (versa) {
+            stppp.li <- Lcross(stppp, type2, type1)
+            stppp.ji <- Jcross(stppp, type2, type1)
+        } else {
+            stppp.li <- Lcross(stppp, type1, type2)
+            stppp.ji <- Jcross(stppp, type1, type2)
+        }
+        #stppp.env <- envelope(stppp, fun = Lcross, nsim = 99, funargs = list(i=type1, j=type2,
+        #correction = 'Ripley'))
+
+    }
     #return(stppp)
-    plot(stppp.li)
+    return(list(stppp.li, stppp.ji, stppp))
 }
 
-data_to_ppp('Connecticut', 'CT', state = state.ct, premise = alc, type2= 'On')
-data_to_ppp('New York', 'NY', state = state.ny, premise = alc)
-data_to_ppp('Pennsylvania', 'PA', state = state.pa, premise = alc, type2 = 'On')
+system.time(ct.on <- data_to_ppp('Connecticut', 'CT', state = state.ct, premise = alc, type2= 'On'))
+system.time(ct.off <- data_to_ppp('Connecticut', 'CT', state = state.ct, premise = alc, type2= 'Off'))
+system.time(ny.on <- data_to_ppp('New York', 'NY', state = state.ny, premise = alc, type2 = 'On', bound = 'poly'))
+system.time(ny.off <- data_to_ppp('New York', 'NY', state = state.ny, premise = alc, type2 = 'Off', bound = 'poly'))
+system.time(pa.on <- data_to_ppp('Pennsylvania', 'PA', state = state.pa, premise = alc, type2 = 'On', bound = 'poly'))
+system.time(pa.off <- data_to_ppp('Pennsylvania', 'PA', state = state.pa, premise = alc, type2 = 'Off', bound = 'poly'))
 
+system.time(ct.onh <- data_to_ppp('Connecticut', 'CT', state = state.ct, premise = alc, type2= 'On', inhom = F))
+system.time(ct.offh <- data_to_ppp('Connecticut', 'CT', state = state.ct, premise = alc, type2= 'Off', inhom = F))
+
+plot(ct.on[[1]], .-r~.x)
+plot(ct.off[[1]], .-r~.x)
+
+plot(ny.on[[1]], .-r~.x)
+plot(ny.off[[1]], .-r~.x)
