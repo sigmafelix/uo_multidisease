@@ -190,3 +190,18 @@ plot(ct.off[[1]], .-r~.x)
 
 plot(ny.on[[1]], .-r~.x)
 plot(ny.off[[1]], .-r~.x)
+
+# Write plots
+write_plots <- function(paa, state, type, tdir = '/mnt/c/Users/sigma/OneDrive/HIV/Geocoding/'){
+    png(str_c(tdir, 'PA', state, '_', type, '.png'),
+        width = 20, height = 22, res = 300, units = 'cm')
+    plot(paa[[1]], .-r~.x, main = str_c(state, ' (', type, ')'))
+    dev.off()
+}
+
+write_plots(ct.on, 'Connecticut', 'On')
+write_plots(ct.off, 'Connecticut', 'Off')
+write_plots(ny.on, 'New York', 'On')
+write_plots(ny.off, 'New York', 'Off')
+write_plots(pa.on, 'Pennsylvania', 'On')
+write_plots(pa.off, 'Pennsylvania', 'Off')
