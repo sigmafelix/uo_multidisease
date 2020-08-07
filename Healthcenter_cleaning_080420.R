@@ -73,7 +73,11 @@ alcdrug.p <- alcdrug %>%
     mutate(Race = plyr::mapvalues(Race, unique(Race), c('white', 'aian', 'african', 'asianpac'))) %>% 
     dplyr::select(-Race.Code) %>% 
     pivot_wider(id_cols = c(County, State, County.Code), names_from = Race, values_from = 5:29) %>% 
-    mutate(GEOID = sprintf('%05d', County.Code))
+    mutate(GEOID = sprintf('%05d', County.Code)) %>% 
+    arrange(GEOID) %>% 
+    group_by(GEOID) %>% 
+    summarize_at(.vars = vars(everything()), .funs = list(~.[1])) %>% 
+    ungroup
 
 # Alcohol-drug treatment center (proportion of Opioid treatment to the total number of centers)
 alcdrug_treat.p <- alcdrug_treat %>% 
@@ -140,25 +144,60 @@ mental.p <- mental %>%
 
 alcdrug_treat.p %>% filter(duplicated(GEOID))
 
+
+# Drug, HXV, HIV
+pdir2 <- '/mnt/c/Users/sigma/OneDrive/Data/HIV/'
+w_drug <- read_tsv(pdir2 %s% 'Multidisease_data/DrugInduced_County_Year_2001-2018.txt')
+w_hiv <- read_tsv(pdir2 %s% 'Multidisease_data/HIV_County_Year_2001-2018.txt')
+w_hxv <- read_tsv(pdir2 %s% 'Multidisease_data/ViralHepatitis_County_Year_2001-2018.txt')
+
+w_filter <- function(dat, year, header){
+    dat_i <- dat %>% filter(Year == year) %>% dplyr::select(-1)
+    colnames(dat_i) <- c('County', 'FIPS', 'Year', 'YearCode', str_c('Deaths_', header) ,'Population', str_c('r_crude_', header))
+    return(dat_i)
+}
+
+w_drug_f <- w_drug %>% w_filter(2018, 'drug') %>% dplyr::select(2,5,6,7)
+w_hiv_f <- w_hiv %>% w_filter(2018, 'hiv') %>% dplyr::select(2, 5, 7)
+w_hxv_f <- w_hxv %>% w_filter(2018, 'hxv') %>% dplyr::select(2, 5, 7)
+
+w_all_f <- w_drug_f %>% 
+    full_join(w_hiv_f) %>% 
+    full_join(w_hxv_f) %>% 
+    mutate_at(.vars = vars(-1), .funs = list(~as.numeric(ifelse(. %in% c('Suppressed', 'Missing', 'Unreliable'), NA, .))))
+
+
+
+
 # Make county file
 county_attr.s <- county_attr %>% 
     mutate(GEOID = sprintf('%05d', FIPS)) %>% 
     filter(!duplicated(GEOID))
 
-county.ab <- county %>% 
+county.at <- county %>% 
+    st_set_geometry(NULL) %>% 
     left_join(stateab, by= c('STATEFP' = 'FIPS_State')) %>% 
     left_join(county_attr.s %>% filter(!duplicated(FIPS)), by = c('GEOID')) %>% 
-    left_join(commhc.p, c('ab' = 'State', 'County' = 'County')) %>% 
+    #left_join(commhc.p, c('ab' = 'State', 'County' = 'County')) %>% 
     left_join(alcdrug.p, by = c('GEOID')) %>% 
     left_join(alcdrug_treat.p, by = c('GEOID')) %>% 
-    left_join(mental.p, by = c('GEOID'))
+    left_join(mental.p, by = c('GEOID')) %>% 
+    left_join(w_all_f, by = c('GEOID' = 'FIPS')) %>% 
+    mutate_at(.vars = vars(-1:-24, -County.y, -State), .funs = list(~as.numeric(ifelse(. %in% c('Suppressed', 'Missing', 'Unreliable', 'N/A', 'NA'), NA, .))))
+county.ab <- county %>% 
+    st_simplify(50, preserveTopology = TRUE) %>% 
+    st_buffer(0) %>% 
+    dplyr::select(GEOID)
 
 county.ab %>% 
-    filter(duplicated())
+    filter(duplicated(GEOID))
 county_attr %>% 
     filter(duplicated(state.ab) & duplicated(County))
 county_attr %>% 
     filter(duplicated(FIPS)) %>% 
     tail
 
-st_write(county.ab, '/mnt/c/Users/sigma/OneDrive/Data/HIV/Healthcenter/County_Attr_080520.geojson')
+
+st_write(county.ab, '/mnt/d/County_Base.shp')
+write_csv(county.at, '/mnt/d/County_Attributes_080720.csv')
+write_csv(data.frame(matrix(colnames(county.at), ncol = 1)), '/mnt/d/County_AT.csv')
