@@ -41,3 +41,17 @@ covid_us <- covid_us %>%
 write_csv(covid_oh, str_c(pdir, 'COVID_Ohio_Cleaned_063020.csv'))
 write_csv(covid_ms, str_c(pdir, 'COVID_Mississippi_Cleaned_063020.csv'))
 write_csv(covid_us, str_c(pdir, 'COVID_County_Cleaned_063020.csv'))
+
+
+
+## Automated COVID data acquisition
+covid0807 <- read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/08-07-2020.csv')
+dim(covid0807)
+colnames(covid0807)
+
+covid0807 <- covid0807 %>% 
+       filter(Country_Region == 'US') %>% 
+       dplyr::select(-5:-7, -12:-14) %>% 
+       mutate(FIPS = sprintf('%05d', FIPS))
+
+covid0807
