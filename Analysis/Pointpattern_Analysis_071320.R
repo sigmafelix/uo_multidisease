@@ -1,3 +1,4 @@
+## Last revision: 081520
 ## package
 library(pacman)
 p_load(sf, tidyverse, stpp, spatstat)
@@ -205,3 +206,119 @@ write_plots(ny.on, 'New York', 'On')
 write_plots(ny.off, 'New York', 'Off')
 write_plots(pa.on, 'Pennsylvania', 'On')
 write_plots(pa.off, 'Pennsylvania', 'Off')
+
+
+
+### Custom polygon
+data_to_ppp2 <- function(poly, field, group = 'up',#state.name, state.code, state, 
+                        premise, prep.c = prep, type1='PrEP', type2='On', levelset = c(type1, type2), 
+                        bound = 'poly', diggle = FALSE, inhom= TRUE, versa = F){
+    #state.s <- state %>% st_transform(2163)
+    group_ind <- ifelse(group == 'up', 1, 0)
+    poly.su <- poly %>% 
+        filter(!!rlang::sym(field) == group_ind)
+
+    stsf <- prep.c %>% 
+        mutate(type = type1) %>% 
+        dplyr::select(type) %>% st_transform(crs = 2163) %>% 
+        .[poly.su,]
+    st.gcdf <- premise %>% filter(Type %in% c(type2, 'Both'))
+    st.alc <- st.gcdf %>% 
+        mutate(type = type2) %>% 
+        dplyr::select(type) %>% 
+        .[poly.su,] %>% 
+        mutate(geom = geometry) %>% 
+        st_drop_geometry
+    st_geometry(st.alc) <- st.alc$geom
+    
+    stppp <- rbind(stsf, st.alc)
+
+    if (bound == 'rect'){
+        stppp <- ppp(st_coordinates(stppp)[,1],
+                     st_coordinates(stppp)[,2],
+                     window = as.owin(poly = poly.su %>% st_transform(2163) %>% st_geometry),
+                     marks = factor(stppp$type, levels = levelset))
+    } else {
+        owin.poly <- owin(poly = poly.su %>% st_transform(2163) %>% st_coordinates %>%
+                            .[nrow(.):1, 1:2] %>% list(x = .[,1], y = .[,2]))
+        stppp <- ppp(st_coordinates(stppp)[,1],
+                     st_coordinates(stppp)[,2],
+                     window = owin.poly,
+                     marks = factor(stppp$type, levels = levelset))
+        
+    }
+    stppp.prep <- split(stppp)[type1][[1]] %>% density.ppp(at = 'points', diggle = diggle)
+    stppp.prem <- split(stppp)[type2][[1]] %>% density.ppp(at = 'points', diggle = diggle)
+    if (inhom){
+        if (versa){
+            stppp.li <- Lcross.inhom(stppp, type2, type1, stppp.prem, stppp.prep)
+            stppp.ji <- Jcross(stppp, type2, type1)
+        } else {
+            stppp.li <- Lcross.inhom(stppp, type1, type2, stppp.prep, stppp.prem)
+            stppp.ji <- Jcross(stppp, type1, type2)
+        }
+        #stppp.env <- envelope(stppp, fun = Lcross.inhom, nsim = 99, funargs = list(i=type1, j=type2, lambdaI=stppp.prep, lambdaJ=stppp.prem,
+        #correction = 'Ripley'))
+    } else {
+        if (versa) {
+            stppp.li <- Lcross(stppp, type2, type1)
+            stppp.ji <- Jcross(stppp, type2, type1)
+        } else {
+            stppp.li <- Lcross(stppp, type1, type2)
+            stppp.ji <- Jcross(stppp, type1, type2)
+        }
+        #stppp.env <- envelope(stppp, fun = Lcross, nsim = 99, funargs = list(i=type1, j=type2,
+        #correction = 'Ripley'))
+
+    }
+    #return(stppp)
+    return(list(stppp.li, stppp.ji, stppp))
+}
+
+# Above
+ppp_c10_On <- data_to_ppp2(county_t, 'r_hiv_c10', premise = alc_s, prep.c = prep_s)
+ppp_c10_Off <- data_to_ppp2(county_t, 'r_hiv_c10', premise = alc_s, prep.c = prep_s, type2 = 'Off')
+ppp_c20_On <- data_to_ppp2(county_t, 'r_hiv_c20', premise = alc_s, prep.c = prep_s)
+ppp_c20_Off <- data_to_ppp2(county_t, 'r_hiv_c20', premise = alc_s, prep.c = prep_s, type2 = 'Off')
+ppp_c30_On <- data_to_ppp2(county_t, 'r_hiv_c30', premise = alc_s, prep.c = prep_s)
+ppp_c30_Off <- data_to_ppp2(county_t, 'r_hiv_c30', premise = alc_s, prep.c = prep_s, type2 = 'Off')
+ppp_c40_On <- data_to_ppp2(county_t, 'r_hiv_c40', premise = alc_s, prep.c = prep_s)
+ppp_c40_Off <- data_to_ppp2(county_t, 'r_hiv_c40', premise = alc_s, prep.c = prep_s, type2 = 'Off')
+ppp_c50_On <- data_to_ppp2(county_t, 'r_hiv_c50', premise = alc_s, prep.c = prep_s)
+ppp_c50_Off <- data_to_ppp2(county_t, 'r_hiv_c50', premise = alc_s, prep.c = prep_s, type2 = 'Off')
+
+# Below
+ppp_c10u_On <- data_to_ppp2(county_t, 'r_hiv_c10', group = 'd', premise = alc_s, prep.c = prep_s)
+ppp_c10u_Off <- data_to_ppp2(county_t, 'r_hiv_c10', group = 'd', premise = alc_s, prep.c = prep_s, type2 = 'Off')
+ppp_c20u_On <- data_to_ppp2(county_t, 'r_hiv_c20', group = 'd', premise = alc_s, prep.c = prep_s)
+ppp_c20u_Off <- data_to_ppp2(county_t, 'r_hiv_c20', group = 'd', premise = alc_s, prep.c = prep_s, type2 = 'Off')
+ppp_c30u_On <- data_to_ppp2(county_t, 'r_hiv_c30', group = 'd', premise = alc_s, prep.c = prep_s)
+ppp_c30u_Off <- data_to_ppp2(county_t, 'r_hiv_c30', group = 'd', premise = alc_s, prep.c = prep_s, type2 = 'Off')
+ppp_c40u_On <- data_to_ppp2(county_t, 'r_hiv_c40', group = 'd', premise = alc_s, prep.c = prep_s)
+ppp_c40u_Off <- data_to_ppp2(county_t, 'r_hiv_c40', group = 'd', premise = alc_s, prep.c = prep_s, type2 = 'Off')
+ppp_c50u_On <- data_to_ppp2(county_t, 'r_hiv_c50', group = 'd', premise = alc_s, prep.c = prep_s)
+ppp_c50u_Off <- data_to_ppp2(county_t, 'r_hiv_c50', group = 'd', premise = alc_s, prep.c = prep_s, type2 = 'Off')
+
+plot(ppp_c10_On[[1]], main = 'PrEP-On (Upper 10%)')
+plot(ppp_c10u_On[[1]], main = 'PrEP-On (Below 90%)')
+plot(ppp_c10_Off[[1]], main = 'PrEP-Off (Upper 10%)')
+plot(ppp_c10u_Off[[1]], main = 'PrEP-Off (Below 90%)')
+plot(ppp_c20_On[[1]], main = 'PrEP-On (Upper 20%)')
+plot(ppp_c20u_On[[1]], main = 'PrEP-On (Below 80%)')
+plot(ppp_c20_Off[[1]], main = 'PrEP-Off (Upper 20%)')
+plot(ppp_c20u_Off[[1]], main = 'PrEP-Off (Below 80%)')
+plot(ppp_c30_On[[1]], main = 'PrEP-On (Upper 30%)')
+plot(ppp_c30u_On[[1]], main = 'PrEP-On (Below 70%)')
+plot(ppp_c30_Off[[1]], main = 'PrEP-Off (Upper 30%)')
+plot(ppp_c30u_Off[[1]], main = 'PrEP-Off (Below 70%)')
+plot(ppp_c40_On[[1]], main = 'PrEP-On (Upper 40%)')
+plot(ppp_c40u_On[[1]], main = 'PrEP-On (Below 60%)')
+plot(ppp_c40_Off[[1]], main = 'PrEP-Off (Upper 40%)')
+plot(ppp_c40u_Off[[1]], main = 'PrEP-Off (Below 60%)')
+plot(ppp_c50_On[[1]], main = 'PrEP-On (Upper 50%)')
+plot(ppp_c50u_On[[1]], main = 'PrEP-On (Below 50%)')
+plot(ppp_c50_Off[[1]], main = 'PrEP-Off (Upper 50%)')
+plot(ppp_c50u_Off[[1]], main = 'PrEP-Off (Below 50%)')
+dev.off()
+
+save(list=ls()[grep('ppp_c.*', ls())], file = 'PointPattern_county_stratified_081520.RData')
