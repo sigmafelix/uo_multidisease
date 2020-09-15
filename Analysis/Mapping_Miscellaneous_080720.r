@@ -1,4 +1,4 @@
-### last revision: 081520
+### last revision: 091520
 library(pacman)
 p_load(tidyverse, sf, spdep, dtplyr, tmap, rmapshaper, classInt)
 
@@ -6,11 +6,11 @@ county_s <- st_read('/mnt/c/Users/sigma/OneDrive/Data/Geo/tl_2018_us_county.shp'
     st_transform(2163)
 
 county_add <- read_csv('/mnt/c/Users/sigma/OneDrive/Data/HIV/Yusuf/County/Result/County_Attributes_Add.csv')
-covid0807 <- read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/08-07-2020.csv')
-dim(covid0807)
-colnames(covid0807)
+covid0915 <- read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/09-14-2020.csv')
+dim(covid0915)
+colnames(covid0915)
 
-covid0807 <- covid0807 %>% 
+covid0915 <- covid0915 %>% 
        filter(Country_Region == 'US') %>% 
        dplyr::select(-5:-7, -12:-14) %>% 
        mutate(FIPS = sprintf('%05d', FIPS))
@@ -24,15 +24,15 @@ county_attr <- read_csv('/mnt/c/Users/sigma/OneDrive/Data/HIV/Yusuf/County/USA_c
 ## make merged data
 county_merge <- county_s %>% 
     left_join(county_attr, by = c('GEOID' = 'GEOID')) %>% 
-    left_join(covid0807, by = c('GEOID' = 'FIPS')) %>% 
+    left_join(covid0915, by = c('GEOID' = 'FIPS')) %>% 
     dplyr::select(-2:-3,-5:-20)
 
 county_merge_s <- county_merge %>% 
   ms_simplify(keep = 0.1, method = 'dp')
 
 write_csv(county_merge_s %>% st_set_geometry(NULL),
-          '/mnt/c/Users/sigma/OneDrive/Data/HIV/Yusuf/County/Result/County_Merged_Attributes_081020.csv')
-st_write(county_merge_s, '/mnt/c/Users/sigma/OneDrive/Data/HIV/Yusuf/County/Result/County_Merged_081020.geojson')
+          '/mnt/c/Users/sigma/OneDrive/Data/HIV/Yusuf/County/Result/County_Merged_Attributes_091520.csv')
+st_write(county_merge_s, '/mnt/c/Users/sigma/OneDrive/Data/HIV/Yusuf/County/Result/County_Merged_091520.geojson')
 st_write(county_merge_s[,'GEOID'], '/mnt/c/Users/sigma/OneDrive/Data/HIV/Yusuf/County/Result/County_Base.shp')
 
 
