@@ -30,8 +30,8 @@ county_merge <- county_s %>%
 county_merge_s <- county_merge %>% 
   ms_simplify(keep = 0.1, method = 'dp')
 
-write_csv(county_merge_s %>% st_set_geometry(NULL),
-          '/mnt/c/Users/sigma/OneDrive/Data/HIV/Yusuf/County/Result/County_Merged_Attributes_091520.csv')
+write_csv(county_merge_s %>% st_set_geometry(NULL) %>% filter(!duplicated(GEOID)),
+          '/mnt/c/Users/sigma/OneDrive/Data/HIV/Yusuf/County/Result/County_Merged_Attributes_091620.csv')
 st_write(county_merge_s, '/mnt/c/Users/sigma/OneDrive/Data/HIV/Yusuf/County/Result/County_Merged_091520.geojson')
 st_write(county_merge_s[,'GEOID'], '/mnt/c/Users/sigma/OneDrive/Data/HIV/Yusuf/County/Result/County_Base.shp')
 
