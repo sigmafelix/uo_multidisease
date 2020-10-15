@@ -1,4 +1,4 @@
-## Last revision: 081520
+## Last revision: 101520
 ## package
 library(pacman)
 p_load(sf, tidyverse, stpp, spatstat)
@@ -6,18 +6,19 @@ p_load(sf, tidyverse, stpp, spatstat)
 
 hdir <- '/home/felix/'
 hdir <- 'C:/Users/sigma/'
+hdir <- '/mnt/c/Users/sigma/'
 
 ## spatial data
-## subset to PA, NY, CT
+## subset to NJ, NY, CT
 county <- st_read(str_c(hdir, 'OneDrive/Data/Geo/tl_2014_us_county.shp'))
 county.ny <- county %>% filter(STATEFP == 36) %>% st_transform(4326)
-county.pa <- county %>% filter(STATEFP == 42) %>% st_transform(4326)
+county.nj <- county %>% filter(STATEFP == 34) %>% st_transform(4326)
 county.ct <- county %>% filter(STATEFP == '09') %>% st_transform(4326)
 
 state <- st_read(str_c(hdir, 'OneDrive/Data/Geo/tl_2017_us_state.shp'))
 state <- st_read(str_c(hdir, 'OneDrive/Data/Geo/State_2017.gpkg'))
 state.ny <- state %>% filter(STATEFP == 36) %>% st_transform(4326)
-state.pa <- state %>% filter(STATEFP == 42) %>% st_transform(4326)
+state.nj <- state %>% filter(STATEFP == 34) %>% st_transform(4326)
 state.ct <- state %>% filter(STATEFP == '09') %>% st_transform(4326)
 
 ## read geocoded data
@@ -81,7 +82,9 @@ ddd <- read.table(text = dd, sep = '\t', header = T)
 
 
 ## On- and Off-premise
-alc <- st_read(str_c(hdir, 'OneDrive/Data/HIV/Geocoding/Geocoding_Premise_Cleaned_Active.shp'))
+#alc <- st_read(str_c(hdir, 'OneDrive/Data/HIV/Geocoding/Geocoding_Premise_Cleaned_Active.shp'))
+alc <- read_csv('/mnt/c/Users/sigma/OneDrive/Data/HIV/Geocoding/Geocoding_Base_092420_Geocodio.csv') %>% 
+    st_as_sf(coords = c('Longitude', 'Latitude'), crs = 4326)
 alc <- alc %>% st_transform(2163)
 prep <- prep %>% st_transform(2163)
 state.ct <- state.ct %>% st_transform(2163)
@@ -176,27 +179,42 @@ data_to_ppp <- function(state.name, state.code, state,
     return(list(stppp.li, stppp.ji, stppp))
 }
 
+# PrEP-Premise
 system.time(ct.on <- data_to_ppp('Connecticut', 'CT', state = state.ct, premise = alc, type2= 'On'))
 system.time(ct.off <- data_to_ppp('Connecticut', 'CT', state = state.ct, premise = alc, type2= 'Off'))
 system.time(ny.on <- data_to_ppp('New York', 'NY', state = state.ny, premise = alc, type2 = 'On', bound = 'poly'))
 system.time(ny.off <- data_to_ppp('New York', 'NY', state = state.ny, premise = alc, type2 = 'Off', bound = 'poly'))
-system.time(pa.on <- data_to_ppp('Pennsylvania', 'PA', state = state.pa, premise = alc, type2 = 'On', bound = 'poly'))
-system.time(pa.off <- data_to_ppp('Pennsylvania', 'PA', state = state.pa, premise = alc, type2 = 'Off', bound = 'poly'))
+system.time(nj.on <- data_to_ppp('New Jersey', 'NJ', state = state.nj, premise = alc, type2 = 'On', bound = 'poly'))
+system.time(nj.off <- data_to_ppp('New Jersey', 'NJ', state = state.nj, premise = alc, type2 = 'Off', bound = 'poly'))
+
+# Premise-PrEP
+system.time(ct.on.r <- data_to_ppp('Connecticut', 'CT', state = state.ct, premise = alc, type2= 'On', levelset = c('On', 'PrEP'), versa = T))
+system.time(ct.off.r <- data_to_ppp('Connecticut', 'CT', state = state.ct, premise = alc, type2= 'Off', levelset = c('Off', 'PrEP'), versa = T))
+system.time(ny.on.r <- data_to_ppp('New York', 'NY', state = state.ny, premise = alc, type2 = 'On', levelset = c('On', 'PrEP'), bound = 'poly', versa = T))
+system.time(ny.off.r <- data_to_ppp('New York', 'NY', state = state.ny, premise = alc, type2 = 'Off', levelset = c('Off', 'PrEP'), bound = 'poly', versa = T))
+system.time(nj.on.r <- data_to_ppp('New Jersey', 'NJ', state = state.nj, premise = alc, type2 = 'On', levelset = c('On', 'PrEP'), bound = 'poly', versa = T))
+system.time(nj.off.r <- data_to_ppp('New Jersey', 'NJ', state = state.nj, premise = alc, type2 = 'Off', levelset = c('Off', 'PrEP'), bound = 'poly', versa = T))
+
+
 
 system.time(ct.onh <- data_to_ppp('Connecticut', 'CT', state = state.ct, premise = alc, type2= 'On', inhom = F))
 system.time(ct.offh <- data_to_ppp('Connecticut', 'CT', state = state.ct, premise = alc, type2= 'Off', inhom = F))
 
-plot(ct.on[[1]], .-r~.x)
+plot(ct.on[[1]], .-r~.x, asp = 1)
+plot(ct.on.r[[1]], .-r~.x, asp = 1)
 plot(ct.off[[1]], .-r~.x)
 
 plot(ny.on[[1]], .-r~.x)
 plot(ny.off[[1]], .-r~.x)
 
+plot(nj.on.r[[1]], .-r~.x)
+plot(nj.off.r[[1]], .-r~.x)
+
 # Write plots
-write_plots <- function(paa, state, type, tdir = '/mnt/c/Users/sigma/OneDrive/HIV/Geocoding/'){
-    png(str_c(tdir, 'PA', state, '_', type, '.png'),
+write_plots <- function(paa, state, type, tdir = '/mnt/c/Users/sigma/OneDrive/Data/HIV/Geocoding/'){
+    png(str_c(tdir, 'PA_', state, '_', type, '.png'),
         width = 20, height = 22, res = 300, units = 'cm')
-    plot(paa[[1]], .-r~.x, main = str_c(state, ' (', type, ')'))
+    plot(paa[[1]], .-r~.x, main = str_c(state, ' (', type, ')'), asp = 1, xlim = c(0, 30000))
     dev.off()
 }
 
@@ -204,8 +222,15 @@ write_plots(ct.on, 'Connecticut', 'On')
 write_plots(ct.off, 'Connecticut', 'Off')
 write_plots(ny.on, 'New York', 'On')
 write_plots(ny.off, 'New York', 'Off')
-write_plots(pa.on, 'Pennsylvania', 'On')
-write_plots(pa.off, 'Pennsylvania', 'Off')
+write_plots(nj.on, 'New Jersey', 'On')
+write_plots(nj.off, 'New Jersey', 'Off')
+
+write_plots(ct.on.r, 'Connecticut', 'On')
+write_plots(ct.off.r, 'Connecticut', 'Off')
+write_plots(ny.on.r, 'New York', 'On')
+write_plots(ny.off.r, 'New York', 'Off')
+write_plots(nj.on.r, 'New Jersey', 'On')
+write_plots(nj.off.r, 'New Jersey', 'Off')
 
 
 

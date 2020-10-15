@@ -1,4 +1,4 @@
-### last revision: 090220
+### last revision: 101420
 library(pacman)
 p_load(tidyverse, sf, spdep, dtplyr, tmap, rmapshaper, classInt, nngeo)
 
@@ -6,7 +6,9 @@ p_load(tidyverse, sf, spdep, dtplyr, tmap, rmapshaper, classInt, nngeo)
 # county with attributes
 county_a <- st_read('/mnt/c/Users/sigma/OneDrive/Data/HIV/Yusuf/County/Result/County_Merged_081020.geojson')
 # geocoded alcohol outlets
-alc <- st_read('/mnt/c/Users/sigma/OneDrive/Data/HIV/Geocoding/Geocoding_Premise_Cleaned_Active.shp')
+#alc <- st_read('/mnt/c/Users/sigma/OneDrive/Data/HIV/Geocoding/Geocoding_Premise_Cleaned_Active.shp')
+alc <- read_csv('/mnt/c/Users/sigma/OneDrive/Data/HIV/Geocoding/Geocoding_Base_092420_Geocodio.csv') %>% 
+    st_as_sf(coords = c('Longitude', 'Latitude'), crs = 4326)
 # PrEP centers
 prep <- st_read('/mnt/c/Users/sigma/OneDrive/Data/HIV/PREP_CDC.gpkg')
 
@@ -109,7 +111,7 @@ nndists <- bind_rows(
 ) %>% 
     mutate(percentage = str_c(seq(10,50,10), '%'), Var1 = 'Alcohol', Var2 = 'PrEP')
 
-nndists %>% write_csv('/mnt/c/Users/sigma/OneDrive/Data/HIV/NearestNeighborDistance_081520.csv')
+nndists %>% write_csv('/mnt/c/Users/sigma/OneDrive/Data/HIV/NearestNeighborDistance_K1_101520.csv')
 
 ### k = 3
 nndist_c10 <- calc_nndist(alc_s, prep_s, county_t, k = 3, 'r_hiv_c10')
@@ -118,7 +120,7 @@ nndist_c30 <- calc_nndist(alc_s, prep_s, county_t, k = 3, 'r_hiv_c30')
 nndist_c40 <- calc_nndist(alc_s, prep_s, county_t, k = 3, 'r_hiv_c40')
 nndist_c50 <- calc_nndist(alc_s, prep_s, county_t, k = 3, 'r_hiv_c50')
 
-nndists <- bind_rows(
+nndists3 <- bind_rows(
     nndist_c10,
     nndist_c20,
     nndist_c30,
@@ -126,4 +128,4 @@ nndists <- bind_rows(
     nndist_c50
 ) %>% 
     mutate(percentage = str_c(seq(10,50,10), '%'), Var1 = 'Alcohol', Var2 = 'PrEP')
-nndists %>% write_csv('/mnt/c/Users/sigma/OneDrive/Data/HIV/NearestNeighborDistance_090220.csv')
+nndists3 %>% write_csv('/mnt/c/Users/sigma/OneDrive/Data/HIV/NearestNeighborDistance_K3_101520.csv')
