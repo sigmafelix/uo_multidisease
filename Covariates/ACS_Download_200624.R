@@ -2,7 +2,7 @@
 ### Version 062420
 library(pacman)
 p_load(tidycensus, tidyverse, sf)
-capi <- '05db0646f9956eba295b88d5a86bf4fe455459f3'
+capi <- ''
 
 census_api_key(capi)
 
