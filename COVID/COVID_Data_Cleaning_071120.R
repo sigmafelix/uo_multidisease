@@ -262,6 +262,7 @@ covid_period2 <- covid1007s %>%
 covid0331 <- read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/03-31-2020.csv')
 covid0401 <- read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/04-01-2020.csv')
 covid1007 <- read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/10-07-2020.csv')
+covid0630 <- read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/06-30-2021.csv')
 
 
 covid0331s <- covid0331 %>% covid_filter
@@ -289,12 +290,15 @@ covid_periods_all <- covid_period1 %>%
   full_join(covid_period1s) %>% 
   full_join(covid_period2s) 
 
+
 # previous dataset
 covars_ext = read_csv('/mnt/c/Users/sigma/OneDrive/Data/HIV/COVID-Mental/Data/County_Data_Mental_2018_012121.csv')
 covars_extd = covars_ext %>% 
   mutate(GEOID = sprintf('%05d', GEOID)) %>%
   full_join(covid_periods_all, by = c('GEOID' = 'FIPS')) %>%
-  filter(GEOID %in% sprintf('%05d', covars_ext$GEOID))
+  filter(GEOID %in% sprintf('%05d', covars_ext$GEOID)) %>%
+  mutate_at(.vars = vars(starts_with('Confirmed')),
+            .funs = list(~ifelse(!GEOID %in% covid_periods_all$FIPS, NA, ifelse(is.na(.), 0, .))))
 dim(covars_extd)
 write_csv(covars_extd, '/mnt/c/Users/sigma/OneDrive/Data/HIV/COVID-Mental/Data/County_Data_Mental_2018_063021.csv')
 
@@ -303,6 +307,38 @@ covars_ext = read_csv('/mnt/c/Users/sigma/OneDrive/Data/HIV/COVID-Mental/Data/Co
 covars_extd = covars_ext %>% 
   mutate(GEOID = sprintf('%05d', GEOID)) %>%
   full_join(covid_periods_all, by = c('GEOID' = 'FIPS')) %>%
-  filter(GEOID %in% sprintf('%05d', covars_ext$GEOID))
+  filter(GEOID %in% sprintf('%05d', covars_ext$GEOID)) %>%
+  mutate_at(.vars = vars(starts_with('Confirmed')),
+            .funs = list(~ifelse(!GEOID %in% covid_periods_all$FIPS, NA, ifelse(is.na(.), 0, .))))
 dim(covars_extd)
-write_csv(covars_extd, '/mnt/c/Users/sigma/OneDrive/Data/HIV/COVID-Mental/Data/County_Data_Mental_imputed_2019_063021.csv')
+write_csv(covars_extd, '/mnt/c/Users/sigma/OneDrive/Data/HIV/COVID-Mental/Data/County_Data_Mental_i2019_063021.csv')
+
+
+covars_ext = read_csv('/mnt/c/Users/sigma/OneDrive/Data/HIV/COVID-Mental/Data/County_Data_Mental_i2019_Travel_070221.csv')
+covars_extd = covars_ext %>% 
+  select(-starts_with('Confirmed')) %>%
+  #mutate(GEOID = sprintf('%05d', GEOID)) %>%
+  full_join(covid_periods_all, by = c('GEOID' = 'FIPS')) %>%
+  filter(GEOID %in% covars_ext$GEOID) %>%
+  mutate_at(.vars = vars(starts_with('Confirmed')),
+            .funs = list(~ifelse(!GEOID %in% covid_periods_all$FIPS, NA, ifelse(is.na(.), 0, .))))
+dim(covars_extd)
+summary(covars_extd)
+write_csv(covars_extd, '/mnt/c/Users/sigma/OneDrive/Data/HIV/COVID-Mental/Data/County_Data_Mental_i2019_Travel_NAfix_070321.csv')
+
+
+## GEOID
+covid_periods_all = read_rds('/mnt/c/Users/sigma/OneDrive/Data/HIV/COVID_New_Period_070321.rds')
+p_load(rmapshaper)
+cnty = st_read('/mnt/c/Users/sigma/OneDrive/Data/Geo/tl_2018_us_county.shp')
+cnty_s = cnty %>%
+  st_transform(2163) %>%
+  ms_simplify(keep = 0.1, keep_shapes = TRUE)
+
+covars_ext = covars_ext %>%
+  mutate(GEOID = sprintf('%05d', GEOID))
+
+sum(cnty$GEOID %in% covid_periods_all$FIPS)
+sum(covid_periods_all$FIPS %in% cnty$GEOID)
+sum(covars_ext$GEOID %in% sprintf('%05d', covid0630$FIPS))
+sum(sprintf('%05d', covid0630$FIPS) %in% covars_ext$GEOID)
